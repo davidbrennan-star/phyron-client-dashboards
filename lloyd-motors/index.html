@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lloyd Motor Group — Campaign Performance</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; font-size: 14px; }
+
+  header { background: #fff; border-bottom: 1px solid #e8e8e4; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-mark { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 28px; height: 28px; background: #c8f135; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+  .logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; color: #1a1a1a; }
+  .logo-text span { color: #999; font-weight: 400; margin-left: 6px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .client-tag { font-size: 12px; color: #888; }
+  .period-badge { font-size: 11px; color: #888; background: #f0f0ee; padding: 4px 10px; border-radius: 20px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  .filter-bar { background: #fff; border: 1px solid #e8e8e4; border-radius: 10px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .filter-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
+  .month-btns { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .mbtn { font-size: 11px; padding: 5px 10px; border: 1px solid #e8e8e4; border-radius: 20px; background: #fff; color: #888; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .mbtn:hover { border-color: #bbb; color: #444; }
+  .mbtn.active { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+  .mbtn.accent { background: #c8f135; border-color: #c8f135; color: #1a1a1a; font-weight: 600; }
+  .reset-btn { font-size: 11px; padding: 5px 12px; border: 1px solid #e8e8e4; border-radius: 20px; background: #fff; color: #999; cursor: pointer; white-space: nowrap; }
+  .reset-btn:hover { color: #444; border-color: #bbb; }
+
+  .metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+  .metric { background: #fff; border: 1px solid #e8e8e4; border-radius: 10px; padding: 16px 18px; transition: border-color 0.2s; }
+  .metric.highlight { border-top: 3px solid #c8f135; }
+  .metric-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .metric-value { font-size: 22px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.5px; line-height: 1; }
+  .metric-sub { font-size: 11px; margin-top: 6px; color: #bbb; }
+  .metric-sub.up { color: #5a9e2f; }
+
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .chart-wide { grid-column: 1 / -1; }
+  .card { background: #fff; border: 1px solid #e8e8e4; border-radius: 10px; padding: 20px 22px; }
+  .card-title { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }
+  .card-sub { font-size: 12px; color: #bbb; margin-bottom: 16px; }
+  .chart-wrap { position: relative; width: 100%; }
+  .no-data { display: none; align-items: center; justify-content: center; height: 100%; font-size: 12px; color: #bbb; }
+
+  .legend { display: flex; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #999; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  .footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 4px; }
+  .footer-left { font-size: 11px; color: #bbb; }
+  .footer-brand { font-weight: 700; color: #1a1a1a; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <div class="logo-icon">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="2,1 12,7 2,13" fill="#1a1a1a"/></svg>
+    </div>
+    <div class="logo-text">Phyron <span>/ Campaign Report</span></div>
+  </div>
+  <div class="header-right">
+    <div class="client-tag">Lloyd Motor Group</div>
+    <div class="period-badge" id="activePeriod">Apr 2025 – Feb 2026</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="filter-bar">
+    <div class="filter-label">Filter by month</div>
+    <div class="month-btns" id="monthBtns"></div>
+    <button class="reset-btn" onclick="resetFilter()">Show all</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total video views</div>
+      <div class="metric-value" id="m1">—</div>
+      <div class="metric-sub" id="m1s">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Avg monthly views</div>
+      <div class="metric-value" id="m2">—</div>
+      <div class="metric-sub">Per month average</div>
+    </div>
+    <div class="metric highlight">
+      <div class="metric-label">Avg watch time</div>
+      <div class="metric-value" id="m3">—</div>
+      <div class="metric-sub up">↑ Consistent all year</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total leads</div>
+      <div class="metric-value" id="m4">—</div>
+      <div class="metric-sub" id="m4s">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Fullscreen clicks</div>
+      <div class="metric-value" id="m5">—</div>
+      <div class="metric-sub" id="m5s">—</div>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="card chart-wide">
+      <div class="card-title">Video views per month</div>
+      <div class="card-sub">Total Phyron video views alongside cars in stock</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#2c6fad"></div>Video views</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ccc"></div>Cars in stock</div>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c1"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Average views per car</div>
+      <div class="card-sub">How many times each listed vehicle was viewed</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c2"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Average watch time per car (seconds)</div>
+      <div class="card-sub">Viewer engagement remains consistently strong</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c3"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Leads per month</div>
+      <div class="card-sub">Lead volume generated via video campaigns</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c4"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Fullscreen clicks per month</div>
+      <div class="card-sub">Viewers actively choosing to engage fullscreen</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c5"></canvas></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">Data sourced from Phyron monthly campaign report · February 2026</div>
+    <div class="footer-left">Powered by <span class="footer-brand">Phyron</span></div>
+  </div>
+</div>
+
+<script>
+const ALL_DATA = [
+  { month:'Apr', views:14503, stock:1204.67, avpcar:12.04, watchtime:null,  leads:null, clicks:null },
+  { month:'May', views:16249, stock:1226.32, avpcar:13.25, watchtime:null,  leads:null, clicks:null },
+  { month:'Jun', views:15694, stock:1179.97, avpcar:13.3,  watchtime:null,  leads:null, clicks:null },
+  { month:'Jul', views:15170, stock:1093.16, avpcar:13.88, watchtime:37.53, leads:53,   clicks:256  },
+  { month:'Aug', views:15396, stock:1062.32, avpcar:14.49, watchtime:37.11, leads:55,   clicks:304  },
+  { month:'Sep', views:13806, stock:1019.1,  avpcar:13.55, watchtime:37.42, leads:60,   clicks:298  },
+  { month:'Oct', views:15350, stock:1206.45, avpcar:12.72, watchtime:36.95, leads:49,   clicks:285  },
+  { month:'Nov', views:15745, stock:1356.63, avpcar:11.61, watchtime:36.85, leads:56,   clicks:323  },
+  { month:'Dec', views:14604, stock:1549.29, avpcar:9.43,  watchtime:36.7,  leads:32,   clicks:322  },
+  { month:'Jan', views:17146, stock:1355.61, avpcar:12.65, watchtime:37.64, leads:74,   clicks:367  },
+  { month:'Feb', views:13692, stock:1205.43, avpcar:11.36, watchtime:37.54, leads:55,   clicks:271  },
+];
+
+let selectedMonths = new Set(ALL_DATA.map(d => d.month));
+
+const blue='#2c6fad', blueA='rgba(44,111,173,0.1)';
+const teal='#1a8a63', tealA='rgba(26,138,99,0.1)';
+const amber='#b06a10', amberA='rgba(176,106,16,0.08)';
+const gray='#ccc';
+const gridColor='rgba(0,0,0,0.05)', tickColor='#aaa', tickFont={size:11};
+
+const tooltipDefaults = {
+  backgroundColor:'#1a1a1a', titleColor:'#fff', bodyColor:'#ccc',
+  padding:10, cornerRadius:6, displayColors:false,
+  titleFont:{size:11,weight:'600'}, bodyFont:{size:12}
+};
+
+function makeBase(extraScales) {
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{...tooltipDefaults} },
+    scales: extraScales || {
+      x:{ grid:{display:false}, ticks:{font:tickFont,color:tickColor} },
+      y:{ grid:{color:gridColor}, ticks:{font:tickFont,color:tickColor}, border:{display:false} }
+    }
+  };
+}
+
+const charts = {};
+
+function initCharts() {
+  charts.c1 = new Chart(document.getElementById('c1'), {
+    type:'bar',
+    data:{ labels:[], datasets:[
+      { label:'Video views', data:[], backgroundColor:blue, borderRadius:4, yAxisID:'y' },
+      { label:'Cars in stock', data:[], type:'line', borderColor:gray, backgroundColor:'transparent', pointRadius:3, pointBackgroundColor:gray, tension:0.3, yAxisID:'y2', borderWidth:1.5 }
+    ]},
+    options: makeBase({
+      x:{grid:{display:false},ticks:{font:tickFont,color:tickColor}},
+      y:{grid:{color:gridColor},ticks:{font:tickFont,color:tickColor},border:{display:false},position:'left'},
+      y2:{grid:{display:false},ticks:{font:tickFont,color:'#ccc'},border:{display:false},position:'right'}
+    })
+  });
+
+  charts.c2 = new Chart(document.getElementById('c2'), {
+    type:'line',
+    data:{ labels:[], datasets:[{ label:'Avg views/car', data:[], borderColor:amber, backgroundColor:amberA, fill:true, tension:0.35, pointRadius:3, pointBackgroundColor:amber, borderWidth:2 }]},
+    options:{ ...makeBase(), scales:{ x:{grid:{display:false},ticks:{font:tickFont,color:tickColor}}, y:{grid:{color:gridColor},ticks:{font:tickFont,color:tickColor},border:{display:false},min:8,max:16} } }
+  });
+
+  charts.c3 = new Chart(document.getElementById('c3'), {
+    type:'line',
+    data:{ labels:[], datasets:[{ label:'Avg watch time (s)', data:[], borderColor:teal, backgroundColor:tealA, fill:true, tension:0.3, pointRadius:3, pointBackgroundColor:teal, borderWidth:2 }]},
+    options:{ ...makeBase(), scales:{ x:{grid:{display:false},ticks:{font:tickFont,color:tickColor}}, y:{grid:{color:gridColor},ticks:{font:tickFont,color:tickColor},border:{display:false},min:35,max:40} } }
+  });
+
+  charts.c4 = new Chart(document.getElementById('c4'), {
+    type:'bar',
+    data:{ labels:[], datasets:[{ label:'Leads', data:[], backgroundColor:teal, borderRadius:4 }]},
+    options:makeBase()
+  });
+
+  charts.c5 = new Chart(document.getElementById('c5'), {
+    type:'bar',
+    data:{ labels:[], datasets:[{ label:'Fullscreen clicks', data:[], backgroundColor:blue, borderRadius:4 }]},
+    options:makeBase()
+  });
+}
+
+function filtered() {
+  return ALL_DATA.filter(d => selectedMonths.has(d.month));
+}
+
+function avg(arr) {
+  const v = arr.filter(x => x != null);
+  return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null;
+}
+function sum(arr) {
+  const v = arr.filter(x => x != null);
+  return v.length ? v.reduce((a,b)=>a+b,0) : null;
+}
+
+function updateMetrics(data) {
+  const views = data.map(d=>d.views);
+  const totalViews = sum(views);
+  const avgViews = avg(views);
+  const watchTimes = data.map(d=>d.watchtime).filter(x=>x!=null);
+  const avgWatch = avg(watchTimes);
+  const leads = data.map(d=>d.leads).filter(x=>x!=null);
+  const totalLeads = sum(leads);
+  const clicks = data.map(d=>d.clicks).filter(x=>x!=null);
+  const totalClicks = sum(clicks);
+
+  document.getElementById('m1').textContent = totalViews ? totalViews.toLocaleString() : '—';
+  document.getElementById('m1s').textContent = `${data.length} month${data.length!==1?'s':''}`;
+  document.getElementById('m2').textContent = avgViews ? Math.round(avgViews).toLocaleString() : '—';
+  document.getElementById('m3').textContent = avgWatch ? avgWatch.toFixed(1)+'s' : '—';
+  document.getElementById('m4').textContent = totalLeads != null ? totalLeads : '—';
+  document.getElementById('m4s').textContent = leads.length ? `${leads.length} month${leads.length!==1?'s':''} of data` : 'No data for period';
+  document.getElementById('m5').textContent = totalClicks != null ? totalClicks.toLocaleString() : '—';
+  document.getElementById('m5s').textContent = clicks.length ? `${clicks.length} month${clicks.length!==1?'s':''} of data` : 'No data for period';
+
+  // Update period badge
+  if (data.length === ALL_DATA.length) {
+    document.getElementById('activePeriod').textContent = 'Apr 2025 – Feb 2026';
+  } else if (data.length === 1) {
+    document.getElementById('activePeriod').textContent = data[0].month + ' 2025/26';
+  } else {
+    document.getElementById('activePeriod').textContent = `${data[0].month} – ${data[data.length-1].month} 2025/26`;
+  }
+}
+
+function updateCharts(data) {
+  const labels = data.map(d=>d.month);
+
+  charts.c1.data.labels = labels;
+  charts.c1.data.datasets[0].data = data.map(d=>d.views);
+  charts.c1.data.datasets[1].data = data.map(d=>d.stock);
+  charts.c1.update();
+
+  charts.c2.data.labels = labels;
+  charts.c2.data.datasets[0].data = data.map(d=>d.avpcar);
+  charts.c2.update();
+
+  const wtData = data.filter(d=>d.watchtime!=null);
+  charts.c3.data.labels = wtData.map(d=>d.month);
+  charts.c3.data.datasets[0].data = wtData.map(d=>d.watchtime);
+  charts.c3.update();
+
+  const lData = data.filter(d=>d.leads!=null);
+  charts.c4.data.labels = lData.map(d=>d.month);
+  charts.c4.data.datasets[0].data = lData.map(d=>d.leads);
+  charts.c4.update();
+
+  const cData = data.filter(d=>d.clicks!=null);
+  charts.c5.data.labels = cData.map(d=>d.month);
+  charts.c5.data.datasets[0].data = cData.map(d=>d.clicks);
+  charts.c5.update();
+}
+
+function refresh() {
+  const data = filtered();
+  updateMetrics(data);
+  updateCharts(data);
+
+  // Update button states
+  document.querySelectorAll('.mbtn').forEach(btn => {
+    const active = selectedMonths.has(btn.dataset.month);
+    btn.classList.toggle('active', active && selectedMonths.size < ALL_DATA.length);
+  });
+}
+
+function toggleMonth(month) {
+  if (selectedMonths.size === ALL_DATA.length) {
+    // First click after "all" — select only that month
+    selectedMonths = new Set([month]);
+  } else if (selectedMonths.has(month)) {
+    if (selectedMonths.size === 1) {
+      // Don't deselect last month — reset to all
+      resetFilter(); return;
+    }
+    selectedMonths.delete(month);
+  } else {
+    selectedMonths.add(month);
+  }
+  refresh();
+}
+
+function resetFilter() {
+  selectedMonths = new Set(ALL_DATA.map(d=>d.month));
+  document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('active'));
+  refresh();
+}
+
+function buildMonthBtns() {
+  const container = document.getElementById('monthBtns');
+  ALL_DATA.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'mbtn';
+    btn.textContent = d.month;
+    btn.dataset.month = d.month;
+    btn.onclick = () => toggleMonth(d.month);
+    container.appendChild(btn);
+  });
+}
+
+buildMonthBtns();
+initCharts();
+refresh();
+</script>
+</body>
+</html>

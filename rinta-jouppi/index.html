@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rinta Jouppi — Campaign Performance</title>
+<title>Rinta Jouppi — Phyron Campaign Performance</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px}
 header{background:#fff;border-bottom:1px solid #e8e8e4;padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
-.logo-mark{display:flex;align-items:center;gap:10px}
-.logo-icon{width:28px;height:28px;background:#c8f135;border-radius:5px;display:flex;align-items:center;justify-content:center}
-.logo-text{font-size:15px;font-weight:700;letter-spacing:-0.3px;color:#1a1a1a}
-.logo-text span{color:#999;font-weight:400;margin-left:6px}
+.logo-mark{display:flex;align-items:center;gap:12px}
+.logo-img{height:22px;width:auto}
+.logo-text{font-size:13px;font-weight:400;color:#666;border-left:1px solid #e8e8e4;padding-left:12px}
 .header-right{display:flex;align-items:center;gap:12px}
 .client-tag{font-size:12px;color:#888}
 .period-badge{font-size:11px;color:#888;background:#f0f0ee;padding:4px 10px;border-radius:20px}
@@ -54,11 +53,11 @@ header{background:#fff;border-bottom:1px solid #e8e8e4;padding:18px 32px;display
 <body>
 <header>
   <div class="logo-mark">
-    <div class="logo-icon"><svg viewBox="0 0 14 14" fill="none"><polygon points="2,1 12,7 2,13" fill="#1a1a1a"/></svg></div>
-    <div class="logo-text">Phyron <span>/ Campaign Report</span></div>
+    <img class="logo-img" src="data:image/png;base64,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" alt="Phyron">
+    <div class="logo-text">Campaign Report</div>
   </div>
   <div class="header-right">
-    <div class="client-tag">Rinta Jouppi</div>
+    <div class="client-tag" style="color:#888">Rinta Jouppi</div>
     <div class="period-badge" id="periodBadge">Apr 2025 – Mar 2026</div>
   </div>
 </header>

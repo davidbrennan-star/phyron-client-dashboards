@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rinta Jouppi — Campaign Performance</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px}
+header{background:#fff;border-bottom:1px solid #e8e8e4;padding:18px 32px;display:flex;align-items:center;justify-content:space-between}
+.logo-mark{display:flex;align-items:center;gap:10px}
+.logo-icon{width:28px;height:28px;background:#c8f135;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:-0.3px;color:#1a1a1a}
+.logo-text span{color:#999;font-weight:400;margin-left:6px}
+.header-right{display:flex;align-items:center;gap:12px}
+.client-tag{font-size:12px;color:#888}
+.period-badge{font-size:11px;color:#888;background:#f0f0ee;padding:4px 10px;border-radius:20px}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.filter-bar{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.filter-label{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap}
+.month-btns{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.mbtn{font-size:11px;padding:5px 10px;border:1px solid #e8e8e4;border-radius:20px;background:#fff;color:#888;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.mbtn:hover{border-color:#bbb;color:#444}
+.mbtn.active{background:#1a1a1a;border-color:#1a1a1a;color:#fff}
+.reset-btn{font-size:11px;padding:5px 12px;border:1px solid #e8e8e4;border-radius:20px;background:#fff;color:#999;cursor:pointer}
+.reset-btn:hover{color:#444;border-color:#bbb}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.metric{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:16px 18px}
+.metric.highlight{border-top:3px solid #c8f135}
+.metric-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px}
+.metric-value{font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-0.5px;line-height:1}
+.metric-sub{font-size:11px;margin-top:6px;color:#bbb}
+.metric-sub.up{color:#5a9e2f}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-wide{grid-column:1/-1}
+.card{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:20px 22px}
+.card-title{font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px}
+.card-sub{font-size:12px;color:#bbb;margin-bottom:16px}
+.chart-wrap{position:relative;width:100%}
+.legend{display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#999}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.heatmap-wrap{overflow-x:auto}
+.heatmap{width:100%;border-collapse:collapse;font-size:11px}
+.heatmap th{padding:6px 10px;text-align:center;font-weight:600;color:#666;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e8e8e4}
+.heatmap td{padding:10px 8px;text-align:center;font-size:12px;font-weight:600;border-radius:4px}
+.heatmap td.label{text-align:left;font-weight:500;color:#666;background:transparent;font-size:11px;padding-left:0}
+.footer{display:flex;align-items:center;justify-content:space-between;padding:16px 0 4px}
+.footer-left{font-size:11px;color:#bbb}
+.footer-brand{font-weight:700;color:#1a1a1a}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-mark">
+    <div class="logo-icon"><svg viewBox="0 0 14 14" fill="none"><polygon points="2,1 12,7 2,13" fill="#1a1a1a"/></svg></div>
+    <div class="logo-text">Phyron <span>/ Campaign Report</span></div>
+  </div>
+  <div class="header-right">
+    <div class="client-tag">Rinta Jouppi</div>
+    <div class="period-badge" id="periodBadge">Apr 2025 – Mar 2026</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="filter-bar">
+    <div class="filter-label">Filter by month</div>
+    <div class="month-btns" id="monthBtns"></div>
+    <button class="reset-btn" onclick="resetFilter()">Show all</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Total video views</div><div class="metric-value" id="m1">—</div><div class="metric-sub" id="m1s">—</div></div>
+    <div class="metric"><div class="metric-label">Avg monthly views</div><div class="metric-value" id="m2">—</div><div class="metric-sub">Per month average</div></div>
+    <div class="metric highlight"><div class="metric-label">Avg view time</div><div class="metric-value" id="m3">—</div><div class="metric-sub up">↑ Consistent all year</div></div>
+    <div class="metric"><div class="metric-label">Hours watched</div><div class="metric-value" id="m4">—</div><div class="metric-sub" id="m4s">—</div></div>
+    <div class="metric"><div class="metric-label">Fullscreen clicks</div><div class="metric-value" id="m5">—</div><div class="metric-sub" id="m5s">—</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="card chart-wide">
+      <div class="card-title">Video views per month</div>
+      <div class="card-sub">Monthly Phyron video views — Apr 2025 to Mar 2026</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c1"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Hours of video watched per month</div>
+      <div class="card-sub">Total viewing time in hours</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c2"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Average view time</div>
+      <div class="card-sub">Percentage of video watched per view</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c3"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Fullscreen clicks per month</div>
+      <div class="card-sub">Viewers actively choosing to go fullscreen</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c4"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Share clicks per month</div>
+      <div class="card-sub">Videos shared by viewers</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c5"></canvas></div>
+    </div>
+    <div class="card chart-wide">
+      <div class="card-title">Daily views — March 2026</div>
+      <div class="card-sub">Day by day video view performance</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c6"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">When people watch — views by time of day</div>
+      <div class="card-sub">Heatmap showing view volume by day and time</div>
+      <div class="heatmap-wrap" id="heatmap-views"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">When leads come in — leads by time of day</div>
+      <div class="card-sub">Heatmap showing lead volume by day and time</div>
+      <div class="heatmap-wrap" id="heatmap-leads"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">Data sourced from Phyron monthly campaign report · March 2026</div>
+    <div class="footer-left">Powered by <span class="footer-brand">Phyron</span></div>
+  </div>
+</div>
+
+<script>
+const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+const ALL_DATA = [
+  {month:'Apr',views:11348,hours:107.88,viewtime:0.82,fullscreen:1642,shares:294},
+  {month:'May',views:11708,hours:110.71,viewtime:0.81,fullscreen:1670,shares:326},
+  {month:'Jun',views:12339,hours:117.18,viewtime:0.82,fullscreen:1857,shares:329},
+  {month:'Jul',views:11845,hours:112.24,viewtime:0.82,fullscreen:1772,shares:366},
+  {month:'Aug',views:12248,hours:115.67,viewtime:0.82,fullscreen:1858,shares:366},
+  {month:'Sep',views:9611, hours:91.41, viewtime:0.83,fullscreen:1526,shares:275},
+  {month:'Oct',views:10907,hours:103.87,viewtime:0.83,fullscreen:1631,shares:324},
+  {month:'Nov',views:9697, hours:92.74, viewtime:0.82,fullscreen:1374,shares:230},
+  {month:'Dec',views:8987, hours:85.30, viewtime:0.81,fullscreen:1261,shares:287},
+  {month:'Jan',views:12103,hours:116.43,viewtime:0.82,fullscreen:1745,shares:365},
+  {month:'Feb',views:11943,hours:113.66,viewtime:0.81,fullscreen:1793,shares:387},
+  {month:'Mar',views:11405,hours:109.65,viewtime:0.81,fullscreen:1785,shares:359},
+];
+
+const DAILY_MARCH = [482,388,412,388,389,340,320,318,361,406,362,368,345,337,350,329,378,351,305,281,307,364,318,339,332,421,375,497,425,435,382];
+
+const blue='#2c6fad',blueA='rgba(44,111,173,0.1)';
+const teal='#1a8a63',tealA='rgba(26,138,99,0.1)';
+const amber='#b06a10',amberA='rgba(176,106,16,0.08)';
+const purple='#6b5fc7',purpleA='rgba(107,95,199,0.1)';
+const gridColor='rgba(0,0,0,0.05)',tickColor='#aaa',tickFont={size:11};
+
+const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:tickFont,color:tickColor}},y:{grid:{color:gridColor},ticks:{font:tickFont,color:tickColor},border:{display:false}}}};
+
+let selectedMonths = new Set(MONTHS);
+const charts={};
+
+function initCharts(){
+  charts.c1=new Chart(document.getElementById('c1'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:blue,backgroundColor:blueA,fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:blue,borderWidth:2}]},options:{...base,scales:{...base.scales,y:{...base.scales.y,min:7000}}}});
+  charts.c2=new Chart(document.getElementById('c2'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:teal,backgroundColor:tealA,fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:teal,borderWidth:2}]},options:base});
+  charts.c3=new Chart(document.getElementById('c3'),{type:'line',data:{labels:[],datasets:[{data:[],borderColor:amber,backgroundColor:amberA,fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:amber,borderWidth:2}]},options:{...base,scales:{...base.scales,y:{...base.scales.y,min:0.75,max:0.90,ticks:{...base.scales.y.ticks,callback:v=>(v*100).toFixed(0)+'%'}}}}});
+  charts.c4=new Chart(document.getElementById('c4'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:blue,borderRadius:4}]},options:base});
+  charts.c5=new Chart(document.getElementById('c5'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:purple,borderRadius:4}]},options:base});
+  charts.c6=new Chart(document.getElementById('c6'),{type:'bar',data:{labels:Array.from({length:31},(_,i)=>i+1),datasets:[{label:'Views',data:DAILY_MARCH,backgroundColor:blue,borderRadius:3}]},options:{...base,scales:{x:{grid:{display:false},ticks:{font:{size:10},color:tickColor}},y:{grid:{color:gridColor},ticks:{font:tickFont,color:tickColor},border:{display:false}}}}});
+}
+
+function buildHeatmap(containerId, data, colorFn) {
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const times = [
+    {label:'Morning\n6AM – 12PM', values: data[0]},
+    {label:'Afternoon\n12PM – 6PM', values: data[1]},
+    {label:'Evening\n6PM – 12AM', values: data[2]},
+    {label:'Night\n12AM – 6AM', values: data[3]},
+  ];
+  const allVals = data.flat();
+  const max = Math.max(...allVals), min = Math.min(...allVals);
+  let html = '<table class="heatmap"><thead><tr><th></th>';
+  days.forEach(d => html += `<th>${d.substring(0,3)}</th>`);
+  html += '</tr></thead><tbody>';
+  times.forEach(row => {
+    html += `<tr><td class="label" style="white-space:pre-line;min-width:90px">${row.label}</td>`;
+    row.values.forEach(v => {
+      const intensity = (v - min) / (max - min);
+      const bg = colorFn(intensity);
+      const textColor = intensity > 0.5 ? '#fff' : '#333';
+      html += `<td style="background:${bg};color:${textColor}">${v}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function greenColor(t) {
+  const r = Math.round(255 - t * (255 - 27));
+  const g = Math.round(255 - t * (255 - 94));
+  const b = Math.round(255 - t * (255 - 32));
+  return `rgb(${r},${g},${b})`;
+}
+
+function filtered(){return ALL_DATA.filter(d=>selectedMonths.has(d.month))}
+function sum(arr){return arr.reduce((a,b)=>a+b,0)}
+function avg(arr){return arr.length?sum(arr)/arr.length:0}
+
+function updateMetrics(data){
+  const totalViews=sum(data.map(d=>d.views));
+  const avgViews=avg(data.map(d=>d.views));
+  const avgTime=avg(data.map(d=>d.viewtime));
+  const totalHours=sum(data.map(d=>d.hours));
+  const totalFS=sum(data.map(d=>d.fullscreen));
+  document.getElementById('m1').textContent=totalViews.toLocaleString();
+  document.getElementById('m1s').textContent=`${data.length} month${data.length!==1?'s':''}`;
+  document.getElementById('m2').textContent=Math.round(avgViews).toLocaleString();
+  document.getElementById('m3').textContent=(avgTime*100).toFixed(0)+'%';
+  document.getElementById('m4').textContent=totalHours.toFixed(0)+'h';
+  document.getElementById('m4s').textContent=`${data.length} month${data.length!==1?'s':''}`;
+  document.getElementById('m5').textContent=totalFS.toLocaleString();
+  document.getElementById('m5s').textContent=`${data.length} month${data.length!==1?'s':''}`;
+  if(data.length===ALL_DATA.length) document.getElementById('periodBadge').textContent='Apr 2025 – Mar 2026';
+  else if(data.length===1) document.getElementById('periodBadge').textContent=data[0].month+' 2025/26';
+  else document.getElementById('periodBadge').textContent=`${data[0].month} – ${data[data.length-1].month} 2025/26`;
+}
+
+function updateCharts(data){
+  const labels=data.map(d=>d.month);
+  ['c1','c2','c3','c4','c5'].forEach(id=>{ charts[id].data.labels=labels; });
+  charts.c1.data.datasets[0].data=data.map(d=>d.views);
+  charts.c2.data.datasets[0].data=data.map(d=>+d.hours.toFixed(1));
+  charts.c3.data.datasets[0].data=data.map(d=>d.viewtime);
+  charts.c4.data.datasets[0].data=data.map(d=>d.fullscreen);
+  charts.c5.data.datasets[0].data=data.map(d=>d.shares);
+  ['c1','c2','c3','c4','c5'].forEach(id=>charts[id].update());
+}
+
+function refresh(){
+  const data=filtered();
+  updateMetrics(data);
+  updateCharts(data);
+  document.querySelectorAll('.mbtn').forEach(btn=>{
+    btn.classList.toggle('active',selectedMonths.has(btn.dataset.month)&&selectedMonths.size<ALL_DATA.length);
+  });
+}
+
+function toggleMonth(month){
+  if(selectedMonths.size===ALL_DATA.length){selectedMonths=new Set([month]);}
+  else if(selectedMonths.has(month)){if(selectedMonths.size===1){resetFilter();return;}selectedMonths.delete(month);}
+  else{selectedMonths.add(month);}
+  refresh();
+}
+
+function resetFilter(){selectedMonths=new Set(MONTHS);document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('active'));refresh();}
+
+function buildMonthBtns(){
+  const c=document.getElementById('monthBtns');
+  MONTHS.forEach(m=>{
+    const btn=document.createElement('button');
+    btn.className='mbtn';btn.textContent=m;btn.dataset.month=m;
+    btn.onclick=()=>toggleMonth(m);c.appendChild(btn);
+  });
+}
+
+// Heatmap data — views
+const viewsHeatmap=[
+  [149,122,142,122,142,122,122],
+  [150,140,150,140,150,140,140],
+  [220,150,220,150,220,150,150],
+  [25,24,24,24,65,104,24],
+];
+// Heatmap data — leads
+const leadsHeatmap=[
+  [15,15,15,15,15,15,15],
+  [10,12,15,5,10,10,10],
+  [32,32,32,45,55,32,32],
+  [5,5,5,5,5,5,5],
+];
+
+buildMonthBtns();
+initCharts();
+refresh();
+buildHeatmap('heatmap-views', viewsHeatmap, greenColor);
+buildHeatmap('heatmap-leads', leadsHeatmap, greenColor);
+</script>
+</body>
+</html>

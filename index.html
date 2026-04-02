@@ -1,23 +1,193 @@
-<div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-        <p class="section-title" style="margin:0;">Pagamenti per trimestre</p>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <select id="filterYear" style="font-size:12px;padding:3px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">
-            <option value="all">Tutti gli anni</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-          </select>
-          <select id="filterQ" style="font-size:12px;padding:3px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">
-            <option value="all">Tutti i trimestri</option>
-            <option value="Q1">Q1</option>
-            <option value="Q2">Q2</option>
-            <option value="Q3">Q3</option>
-            <option value="Q4">Q4</option>
-          </select>
-        </div>
-      </div>
-      <div id="paymentsTotal" style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;"></div>
-      <div style="position:relative;height:180px;">
-        <canvas id="paymentsChart"></canvas>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phyron Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; padding: 24px; }
+  h2 { font-size: 20px; font-weight: 500; margin-bottom: 20px; color: #1a1a1a; }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #888; margin: 0 0 10px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .metric { background: #ebebea; border-radius: 8px; padding: 12px 14px; }
+  .metric .label { font-size: 11px; color: #888; margin: 0 0 4px; }
+  .metric .value { font-size: 22px; font-weight: 500; margin: 0; line-height: 1.2; }
+  .metric .sub { font-size: 12px; color: #888; margin: 2px 0 0; }
+  .badge-warn { display: inline-block; font-size: 11px; font-weight: 500; background: #FAEEDA; color: #633806; padding: 2px 8px; border-radius: 4px; margin-top: 4px; }
+  .badge-ok { display: inline-block; font-size: 11px; font-weight: 500; background: #EAF3DE; color: #27500A; padding: 2px 8px; border-radius: 4px; margin-top: 4px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .card { background: #fff; border: 0.5px solid #e0e0de; border-radius: 12px; padding: 16px 20px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  select { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 0.5px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; }
+  .total-label { font-size: 13px; color: #666; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { font-size: 11px; font-weight: 500; color: #888; text-align: left; padding: 4px 6px 8px; border-bottom: 0.5px solid #e0e0de; }
+  td { padding: 6px; border-bottom: 0.5px solid #f0f0ee; color: #1a1a1a; }
+  tr:last-child td { border-bottom: none; }
+  .amount { text-align: right; font-variant-numeric: tabular-nums; }
+  .total-row td { font-weight: 500; border-top: 0.5px solid #ccc !important; }
+  .muted { color: #888; font-size: 12px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: #666; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+  @media (max-width: 700px) { .metric-grid { grid-template-columns: repeat(2,1fr); } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h2>Phyron — Business Dashboard</h2>
+
+<p class="section-title">Overview</p>
+<div class="metric-grid">
+  <div class="metric"><p class="label">MRR attuale</p><p class="value">€2,108</p><span class="badge-ok">attivo</span></div>
+  <div class="metric"><p class="label">Proiezione annuale</p><p class="value">€25,290</p><p class="sub">base MRR attuale</p></div>
+  <div class="metric"><p class="label">Forecast MRR dic. 2026</p><p class="value">€5k–8k</p><p class="sub">mese</p></div>
+  <div class="metric"><p class="label">Proiezione annuale 2027</p><p class="value">€60k–96k</p><p class="sub">stimata</p></div>
+</div>
+<div class="metric-grid">
+  <div class="metric"><p class="label">Pagamenti totali</p><p class="value">€10,430</p><p class="sub">Q2 2025 – Q1 2026</p></div>
+  <div class="metric"><p class="label">Totale pending</p><p class="value">€17,613</p><span class="badge-warn">da incassare</span></div>
+  <div class="metric"><p class="label">CR app → cliente</p><p class="value">23.6%</p><p class="sub">72 app · 17 clienti</p></div>
+  <div class="metric"><p class="label">AVG MRR per cliente</p><p class="value">€1,036</p><p class="sub">17 clienti totali</p></div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-header">
+      <p class="section-title" style="margin:0;">Pagamenti per trimestre</p>
+      <div style="display:flex;gap:6px;">
+        <select id="filterYear">
+          <option value="all">Tutti gli anni</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+        <select id="filterQ">
+          <option value="all">Tutti i trimestri</option>
+          <option value="Q1">Q1</option>
+          <option value="Q2">Q2</option>
+          <option value="Q3">Q3</option>
+          <option value="Q4">Q4</option>
+        </select>
       </div>
     </div>
+    <p class="total-label" id="paymentsTotal"></p>
+    <div style="position:relative;height:180px;"><canvas id="paymentsChart"></canvas></div>
+  </div>
+  <div class="card">
+    <p class="section-title" style="margin-bottom:12px;">MRR per cliente (€/mese)</p>
+    <div style="position:relative;height:180px;"><canvas id="mrrChart"></canvas></div>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <p class="section-title" style="margin-bottom:12px;">Pagamenti pending</p>
+    <table>
+      <thead><tr><th>Cliente</th><th>Data</th><th class="amount">Importo</th><th class="amount">Fee 15%</th></tr></thead>
+      <tbody>
+        <tr><td>Autosalone Int.</td><td class="muted">2026-03-01</td><td class="amount">€3,390</td><td class="amount">€509</td></tr>
+        <tr><td>Autoalpina/Sicav</td><td class="muted">2025-07-01</td><td class="amount">€1,415</td><td class="amount">€212</td></tr>
+        <tr><td>Autoalpina/Sicav</td><td class="muted">2026-01-01</td><td class="amount">€1,415</td><td class="amount">€212</td></tr>
+        <tr><td>Jolly</td><td class="muted">2025-07-20</td><td class="amount">€13,804</td><td class="amount">€2,071</td></tr>
+        <tr><td>Castiglioni</td><td class="muted">2026-06-23</td><td class="amount">€3,209</td><td class="amount">€481</td></tr>
+        <tr><td>Stefauto/Cisa</td><td class="muted">2025-09-01</td><td class="amount">€12,600</td><td class="amount">€1,890</td></tr>
+        <tr><td>Autobase</td><td class="muted">2025-09-01</td><td class="amount">€7,191</td><td class="amount">€1,079</td></tr>
+        <tr><td>Authos S.P.A</td><td class="muted">2026-02-04</td><td class="amount">€4,858</td><td class="amount">€729</td></tr>
+        <tr class="total-row"><td colspan="2"><strong>Totale fee</strong></td><td></td><td class="amount"><strong>€7,182</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <p class="section-title" style="margin-bottom:12px;">Funnel contatti</p>
+    <div style="position:relative;height:220px;"><canvas id="funnelChart"></canvas></div>
+    <div class="legend">
+      <span><span class="legend-dot" style="background:#3266ad;"></span>Contatti 110</span>
+      <span><span class="legend-dot" style="background:#5DA3E0;"></span>App 72</span>
+      <span><span class="legend-dot" style="background:#8FC5EE;"></span>Proposals 47</span>
+      <span><span class="legend-dot" style="background:#B8D9F4;"></span>Clienti 17</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const textCol = 'rgba(0,0,0,0.45)';
+const gridCol = 'rgba(0,0,0,0.06)';
+
+const allPayments = [
+  { label: 'Q2 2025', year: '2025', q: 'Q2', val: 2184.75 },
+  { label: 'Q3 2025', year: '2025', q: 'Q3', val: 983.24 },
+  { label: 'Q4 2025', year: '2025', q: 'Q4', val: 4340.99 },
+  { label: 'Q1 2026', year: '2026', q: 'Q1', val: 2921.24 },
+];
+
+const payChart = new Chart(document.getElementById('paymentsChart'), {
+  type: 'bar',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: '#3266ad', borderRadius: 4 }] },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: textCol, font: { size: 11 } }, grid: { display: false } },
+      y: { ticks: { color: textCol, font: { size: 11 }, callback: v => '€' + v.toLocaleString() }, grid: { color: gridCol } }
+    }
+  }
+});
+
+function updatePayments() {
+  const y = document.getElementById('filterYear').value;
+  const q = document.getElementById('filterQ').value;
+  const filtered = allPayments.filter(p => (y === 'all' || p.year === y) && (q === 'all' || p.q === q));
+  payChart.data.labels = filtered.map(p => p.label);
+  payChart.data.datasets[0].data = filtered.map(p => p.val);
+  payChart.update();
+  const total = filtered.reduce((s, p) => s + p.val, 0);
+  document.getElementById('paymentsTotal').textContent = filtered.length
+    ? 'Totale: €' + total.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : 'Nessun dato per la selezione';
+}
+document.getElementById('filterYear').addEventListener('change', updatePayments);
+document.getElementById('filterQ').addEventListener('change', updatePayments);
+updatePayments();
+
+const mrrClients = ['City motors','Jolly','Autosalone','Autoalpina','Seven Car','Autostile','Fuji','Rolandi','Cisa','BAse','Autosalone2','Carsoon','Car lovers','Castiglioni','Ghedini','Authos','VW Zentrum'];
+const mrrVals = [1580,1150,847,440,820,290,370,610,1400,800,565,500,828,535,900,1665,750];
+const sorted = mrrClients.map((n,i) => ({n, v: mrrVals[i]})).sort((a,b) => b.v - a.v);
+const mrrHeight = sorted.length * 40 + 80;
+document.getElementById('mrrChart').parentElement.style.height = mrrHeight + 'px';
+
+new Chart(document.getElementById('mrrChart'), {
+  type: 'bar',
+  data: {
+    labels: sorted.map(x => x.n),
+    datasets: [{ data: sorted.map(x => x.v), backgroundColor: '#5DA3E0', borderRadius: 3 }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: textCol, font: { size: 10 }, callback: v => '€' + v }, grid: { color: gridCol } },
+      y: { ticks: { color: textCol, font: { size: 10 } }, grid: { display: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('funnelChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Contatti', 'App', 'Proposals', 'Clienti'],
+    datasets: [{ data: [110, 72, 47, 17], backgroundColor: ['#3266ad','#5DA3E0','#8FC5EE','#B8D9F4'], borderRadius: 4 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: textCol, font: { size: 12 } }, grid: { display: false } },
+      y: { ticks: { color: textCol, font: { size: 11 } }, grid: { color: gridCol } }
+    }
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <p class="section-title" style="margin:0;">Pagamenti per trimestre</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <select id="filterYear" style="font-size:12px;padding:3px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">
+            <option value="all">Tutti gli anni</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+          </select>
+          <select id="filterQ" style="font-size:12px;padding:3px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);">
+            <option value="all">Tutti i trimestri</option>
+            <option value="Q1">Q1</option>
+            <option value="Q2">Q2</option>
+            <option value="Q3">Q3</option>
+            <option value="Q4">Q4</option>
+          </select>
+        </div>
+      </div>
+      <div id="paymentsTotal" style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;"></div>
+      <div style="position:relative;height:180px;">
+        <canvas id="paymentsChart"></canvas>
+      </div>
+    </div>

@@ -7,42 +7,46 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0d0d0d;color:#fff;font-family:system-ui,sans-serif;padding:1.5rem}
-h1{font-size:16px;font-weight:600}
-.sub{font-size:12px;color:#777;margin-top:2px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px}
-.logo{background:#E8510A;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:1px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.5rem}
-.kpi{background:#1a1a1a;border-radius:10px;padding:1rem;border-top:2px solid #E8510A}
-.kpi-label{font-size:11px;color:#777;margin-bottom:4px}
-.kpi-value{font-size:22px;font-weight:600}
-.kpi-sub{font-size:10px;color:#0BA187;margin-top:3px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.chart-box{background:#1a1a1a;border-radius:10px;padding:1rem}
-.chart-title{font-size:13px;font-weight:500;margin-bottom:2px}
-.chart-sub{font-size:11px;color:#666;margin-bottom:10px}
-select{background:#1a1a1a;color:#fff;border:0.5px solid #333;border-radius:6px;padding:5px 10px;font-size:12px}
-footer{text-align:center;font-size:11px;color:#444;margin-top:1.5rem;border-top:0.5px solid #1e1e1e;padding-top:1rem}
-table{width:100%;border-collapse:separate;border-spacing:3px;font-size:11px}
-th{color:#888;font-weight:400;padding-bottom:4px}
-.time-label{font-size:11px;color:#ccc;line-height:1.4}
-.time-sub{font-size:10px;color:#666}
-@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+body{background:#0d0d0d;color:#fff;font-family:system-ui,sans-serif;padding:1.25rem;max-width:1200px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.logo{background:#E8510A;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;letter-spacing:1px}
+.title{font-size:15px;font-weight:600}
+.subtitle{font-size:11px;color:#777;margin-top:2px}
+select{background:#1a1a1a;color:#fff;border:0.5px solid #444;border-radius:6px;padding:4px 10px;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.25rem}
+.kpi{background:#1a1a1a;border-radius:8px;padding:0.75rem;border-top:2px solid #E8510A}
+.kpi-label{font-size:10px;color:#777;margin-bottom:3px}
+.kpi-value{font-size:18px;font-weight:600}
+.kpi-sub{font-size:9px;color:#0BA187;margin-top:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.box{background:#1a1a1a;border-radius:8px;padding:0.875rem}
+.box-title{font-size:12px;font-weight:500;margin-bottom:1px}
+.box-sub{font-size:10px;color:#666;margin-bottom:8px}
+.chart-wrap{position:relative;height:160px}
+table{width:100%;border-collapse:separate;border-spacing:2px;font-size:10px}
+th{color:#777;font-weight:400;padding-bottom:3px;text-align:center}
+th:first-child{text-align:left}
+td{text-align:center;border-radius:3px;padding:6px 2px;font-weight:500}
+.tl{text-align:left;padding-right:6px;line-height:1.4}
+.tl div:first-child{font-size:10px;color:#ccc}
+.tl div:last-child{font-size:9px;color:#666}
+footer{text-align:center;font-size:10px;color:#444;margin-top:1.25rem;border-top:0.5px solid #1e1e1e;padding-top:0.875rem}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<header>
-  <div style="display:flex;align-items:center;gap:12px">
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px">
     <div class="logo">PHYRON</div>
     <div>
-      <h1>Rinta Jouppi</h1>
-      <div class="sub">Campaign Report · Apr 2025 – Apr 2026</div>
+      <div class="title">Rinta Jouppi</div>
+      <div class="subtitle">Campaign Report · Apr 2025 – Apr 2026</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;font-size:12px">
-    <span style="color:#777">Filter by month</span>
-    <select id="monthFilter" onchange="updateCharts()">
+  <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#777">
+    Filter by month
+    <select id="monthFilter" onchange="update()">
       <option>Show all</option>
       <option>Apr 25</option><option>May 25</option><option>Jun 25</option>
       <option>Jul 25</option><option>Aug 25</option><option>Sep 25</option>
@@ -51,45 +55,36 @@ th{color:#888;font-weight:400;padding-bottom:4px}
       <option>Apr 26</option>
     </select>
   </div>
-</header>
+</div>
 
 <div class="kpis">
-  <div class="kpi"><div class="kpi-label">Total video views</div><div class="kpi-value" id="kv1">—</div><div class="kpi-sub">All time in range</div></div>
-  <div class="kpi"><div class="kpi-label">Avg monthly views</div><div class="kpi-value" id="kv2">—</div><div class="kpi-sub">Per month average</div></div>
+  <div class="kpi"><div class="kpi-label">Total video views</div><div class="kpi-value" id="k1">—</div><div class="kpi-sub">All time in range</div></div>
+  <div class="kpi"><div class="kpi-label">Avg monthly views</div><div class="kpi-value" id="k2">—</div><div class="kpi-sub">Per month average</div></div>
   <div class="kpi"><div class="kpi-label">Avg view time</div><div class="kpi-value">80%</div><div class="kpi-sub">↑ Consistent all year</div></div>
-  <div class="kpi"><div class="kpi-label">Hours watched</div><div class="kpi-value" id="kv3">—</div><div class="kpi-sub">Total viewing time</div></div>
-  <div class="kpi"><div class="kpi-label">Fullscreen clicks</div><div class="kpi-value" id="kv4">—</div><div class="kpi-sub">Active engagement</div></div>
+  <div class="kpi"><div class="kpi-label">Hours watched</div><div class="kpi-value" id="k3">—</div><div class="kpi-sub">Total viewing time</div></div>
+  <div class="kpi"><div class="kpi-label">Fullscreen clicks</div><div class="kpi-value" id="k4">—</div><div class="kpi-sub">Active engagement</div></div>
 </div>
 
-<div class="grid2">
-  <div class="chart-box"><div class="chart-title">Video views per month</div><div class="chart-sub">Monthly Phyron video views</div><canvas id="c1" height="140"></canvas></div>
-  <div class="chart-box"><div class="chart-title">Hours of video watched</div><div class="chart-sub">Total viewing time in hours</div><canvas id="c2" height="140"></canvas></div>
+<div class="row">
+  <div class="box"><div class="box-title">Video views per month</div><div class="box-sub">Monthly Phyron video views</div><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
+  <div class="box"><div class="box-title">Hours of video watched</div><div class="box-sub">Total viewing time in hours</div><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
 </div>
-<div class="grid2">
-  <div class="chart-box"><div class="chart-title">Fullscreen clicks per month</div><div class="chart-sub">Viewers actively choosing to go fullscreen</div><canvas id="c3" height="140"></canvas></div>
-  <div class="chart-box"><div class="chart-title">Share clicks per month</div><div class="chart-sub">Videos shared by viewers</div><canvas id="c4" height="140"></canvas></div>
+<div class="row">
+  <div class="box"><div class="box-title">Fullscreen clicks per month</div><div class="box-sub">Viewers choosing to go fullscreen</div><div class="chart-wrap"><canvas id="c3"></canvas></div></div>
+  <div class="box"><div class="box-title">Share clicks per month</div><div class="box-sub">Videos shared by viewers</div><div class="chart-wrap"><canvas id="c4"></canvas></div></div>
 </div>
-
-<div class="grid2">
-  <div class="chart-box">
-    <div class="chart-title">When people watch</div>
-    <div class="chart-sub">Views by time of day — Apr 2026</div>
-    <table id="heat1"></table>
-  </div>
-  <div class="chart-box">
-    <div class="chart-title">When leads come in</div>
-    <div class="chart-sub">Leads by time of day — Apr 2026</div>
-    <table id="heat2"></table>
-  </div>
+<div class="row">
+  <div class="box"><div class="box-title">When people watch</div><div class="box-sub">Views by time of day — Apr 2026</div><table id="t1"></table></div>
+  <div class="box"><div class="box-title">When leads come in</div><div class="box-sub">Leads by time of day — Apr 2026</div><table id="t2"></table></div>
 </div>
 
 <footer>
   <div>Data sourced from Phyron monthly campaign report · April 2026</div>
-  <div style="margin-top:4px;color:#E8510A">Powered by Phyron</div>
+  <div style="margin-top:3px;color:#E8510A">Powered by Phyron</div>
 </footer>
 
 <script>
-const allData = [
+const D=[
   {m:"Apr 25",views:161205,hours:110.7,clicks:885,shares:326,leads:67},
   {m:"May 25",views:173164,hours:117.2,clicks:1142,shares:329,leads:78},
   {m:"Jun 25",views:170445,hours:112.2,clicks:1172,shares:368,leads:104},
@@ -99,94 +94,66 @@ const allData = [
   {m:"Oct 25",views:224165,hours:85.3,clicks:1433,shares:230,leads:57},
   {m:"Nov 25",views:230442,hours:116.4,clicks:1400,shares:287,leads:68},
   {m:"Dec 25",views:230000,hours:113.7,clicks:1785,shares:365,leads:66},
-  {m:"Jan 26",views:11405,hours:109.7,clicks:1793,shares:387,leads:76},
-  {m:"Feb 26",views:11405,hours:109.7,clicks:1785,shares:359,leads:78},
+  {m:"Jan 26",views:224165,hours:109.7,clicks:1793,shares:387,leads:76},
+  {m:"Feb 26",views:230442,hours:109.7,clicks:1785,shares:359,leads:78},
   {m:"Mar 26",views:11405,hours:114.1,clicks:1769,shares:377,leads:81},
   {m:"Apr 26",views:12047,hours:114,clicks:1769,shares:377,leads:81},
 ];
 
-const heatViews = {
-  days:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-  rows:[
-    {l:"Morning",s:"6AM–12PM",d:[390,375,476,417,333,486,503]},
-    {l:"Afternoon",s:"12PM–6PM",d:[640,587,680,657,440,561,572]},
-    {l:"Evening",s:"6PM–12AM",d:[597,600,727,652,516,574,606]},
-    {l:"Night",s:"12AM–6AM",d:[92,93,120,103,69,86,95]},
-  ]
-};
-const heatLeads = {
-  days:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-  rows:[
-    {l:"Morning",s:"6AM–12PM",d:[2,2,5,0,4,9,3]},
-    {l:"Afternoon",s:"12PM–6PM",d:[2,7,5,6,1,10,3]},
-    {l:"Evening",s:"6PM–12AM",d:[4,0,6,3,1,3,0]},
-    {l:"Night",s:"12AM–6AM",d:[0,1,1,2,0,1,0]},
-  ]
-};
+const HV={days:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],rows:[
+  {l:"Morning",s:"6AM–12PM",d:[390,375,476,417,333,486,503]},
+  {l:"Afternoon",s:"12PM–6PM",d:[640,587,680,657,440,561,572]},
+  {l:"Evening",s:"6PM–12AM",d:[597,600,727,652,516,574,606]},
+  {l:"Night",s:"12AM–6AM",d:[92,93,120,103,69,86,95]},
+]};
+const HL={days:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],rows:[
+  {l:"Morning",s:"6AM–12PM",d:[2,2,5,0,4,9,3]},
+  {l:"Afternoon",s:"12PM–6PM",d:[2,7,5,6,1,10,3]},
+  {l:"Evening",s:"6PM–12AM",d:[4,0,6,3,1,3,0]},
+  {l:"Night",s:"12AM–6AM",d:[0,1,1,2,0,1,0]},
+]};
 
-const charts = {};
+const charts={};
+const cfg=(type,labels,data,color,fill)=>({
+  type,data:{labels,datasets:[{data,backgroundColor:fill?color+'22':color,borderColor:color,borderRadius:3,tension:0.3,pointRadius:3,fill:!!fill}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#666',font:{size:9}},grid:{color:'#222'}},y:{ticks:{color:'#666',font:{size:9},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#222'}}}}
+});
 
-function getFiltered() {
-  const f = document.getElementById('monthFilter').value;
-  if (f === 'Show all') return allData;
-  const idx = allData.findIndex(d=>d.m===f);
-  return idx >= 0 ? allData.slice(0,idx+1) : allData;
+function getD(){
+  const f=document.getElementById('monthFilter').value;
+  if(f==='Show all')return D;
+  const i=D.findIndex(d=>d.m===f);
+  return i>=0?D.slice(0,i+1):D;
 }
 
-function makeChart(id, type, labels, datasets, yFmt) {
-  if (charts[id]) charts[id].destroy();
-  charts[id] = new Chart(document.getElementById(id), {
-    type,
-    data: { labels, datasets },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ ticks:{color:'#666',font:{size:9}}, grid:{color:'#222'} },
-        y:{ ticks:{color:'#666',font:{size:9}, callback:yFmt||undefined}, grid:{color:'#222'} }
-      }
-    }
-  });
+function heat(id,h,col){
+  const max=Math.max(...h.rows.flatMap(r=>r.d));
+  const t=document.getElementById(id);
+  t.innerHTML='<thead><tr><th></th>'+h.days.map(d=>`<th>${d}</th>`).join('')+'</tr></thead><tbody>'+
+    h.rows.map(r=>'<tr><td class="tl"><div>'+r.l+'</div><div>'+r.s+'</div></td>'+
+      r.d.map(v=>{
+        const p=v/max;
+        const bg=col==='o'?`rgba(232,81,10,${(.08+p*.82).toFixed(2)})`:`rgba(11,161,135,${(.08+p*.82).toFixed(2)})`;
+        return`<td style="background:${bg};color:${p>.45?'#fff':'#888'}">${v}</td>`;
+      }).join('')+'</tr>'
+    ).join('')+'</tbody>';
 }
 
-function buildHeatmap(tableId, heat, color) {
-  const max = Math.max(...heat.rows.flatMap(r=>r.d));
-  const t = document.getElementById(tableId);
-  t.innerHTML = '';
-  const thead = `<tr><th></th>${heat.days.map(d=>`<th>${d}</th>`).join('')}</tr>`;
-  const rows = heat.rows.map(r => {
-    const cells = r.d.map(v => {
-      const intensity = v/max;
-      const bg = color==='orange'
-        ? `rgba(232,81,10,${(0.08+intensity*0.82).toFixed(2)})`
-        : `rgba(11,161,135,${(0.08+intensity*0.82).toFixed(2)})`;
-      const tc = intensity > 0.45 ? '#fff' : '#aaa';
-      return `<td style="padding:8px 4px;text-align:center;background:${bg};border-radius:4px;font-weight:500;color:${tc}">${v}</td>`;
-    }).join('');
-    return `<tr><td style="padding-right:8px"><div class="time-label">${r.l}</div><div class="time-sub">${r.s}</div></td>${cells}</tr>`;
-  }).join('');
-  t.innerHTML = `<thead>${thead}</thead><tbody>${rows}</tbody>`;
+function update(){
+  const d=getD(),l=d.map(x=>x.m);
+  document.getElementById('k1').textContent=d.reduce((s,x)=>s+x.views,0).toLocaleString();
+  document.getElementById('k2').textContent=Math.round(d.reduce((s,x)=>s+x.views,0)/d.length).toLocaleString();
+  document.getElementById('k3').textContent=d.reduce((s,x)=>s+x.hours,0).toFixed(0)+'h';
+  document.getElementById('k4').textContent=d.reduce((s,x)=>s+x.clicks,0).toLocaleString();
+  ['c1','c2','c3','c4'].forEach(id=>{if(charts[id])charts[id].destroy()});
+  charts.c1=new Chart(document.getElementById('c1'),cfg('bar',l,d.map(x=>x.views),'#E8510A'));
+  charts.c2=new Chart(document.getElementById('c2'),cfg('bar',l,d.map(x=>x.hours),'#0BA187'));
+  charts.c3=new Chart(document.getElementById('c3'),cfg('line',l,d.map(x=>x.clicks),'#E8510A',true));
+  charts.c4=new Chart(document.getElementById('c4'),cfg('bar',l,d.map(x=>x.shares),'#7F77DD'));
+  heat('t1',HV,'o');heat('t2',HL,'t');
 }
-
-function updateCharts() {
-  const d = getFiltered();
-  const labels = d.map(x=>x.m);
-
-  document.getElementById('kv1').textContent = d.reduce((s,x)=>s+x.views,0).toLocaleString();
-  document.getElementById('kv2').textContent = Math.round(d.reduce((s,x)=>s+x.views,0)/d.length).toLocaleString();
-  document.getElementById('kv3').textContent = d.reduce((s,x)=>s+x.hours,0).toFixed(0)+'h';
-  document.getElementById('kv4').textContent = d.reduce((s,x)=>s+x.clicks,0).toLocaleString();
-
-  makeChart('c1','bar',labels,[{data:d.map(x=>x.views),backgroundColor:'#E8510A',borderRadius:3}], v=>v>=1000?(v/1000).toFixed(0)+'k':v);
-  makeChart('c2','bar',labels,[{data:d.map(x=>x.hours),backgroundColor:'#0BA187',borderRadius:3}]);
-  makeChart('c3','line',labels,[{data:d.map(x=>x.clicks),borderColor:'#E8510A',backgroundColor:'rgba(232,81,10,0.1)',tension:0.3,pointRadius:3,fill:true}]);
-  makeChart('c4','bar',labels,[{data:d.map(x=>x.shares),backgroundColor:'#7F77DD',borderRadius:3}]);
-
-  buildHeatmap('heat1', heatViews, 'orange');
-  buildHeatmap('heat2', heatLeads, 'teal');
-}
-
-updateCharts();
+update();
 </script>
 </body>
 </html>
